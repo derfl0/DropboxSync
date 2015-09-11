@@ -59,15 +59,29 @@ class DropboxSync extends SimpleORMap {
      */
     private function syncFile($file) {
 
-        // Build client
-        $Client = $this->getClient();
-
-        // Build paths
+        // Build filepath<
         $filepath = $GLOBALS['UPLOAD_PATH'] . '/' . substr($file->dokument_id, 0, 2) . '/' . $file->dokument_id;
-        $dropboxpath = "/" . $data['Name'] . '/' . $file->filename;
 
         // If file is found on server
         if (file_exists($filepath)) {
+
+            // Build client
+            $Client = $this->getClient();
+
+            // Build paths
+            $folder[] = $file->filename;
+            if ($file->folder) {
+                $folder[] = $file->folder->name;
+                $newfolder = DocumentFolder::find($file->folder->range_id);
+            }
+            while ($newfolder) {
+                $folder[] = $newfolder->name;
+                $newfolder = DocumentFolder::find($newfolder->range_id);
+            }
+            $folder[] = str_replace('/', ' ', $file->course->getFullname());
+            $folder[] = str_replace('/', ' ', $file->course->start_semester->name);
+            
+            $dropboxpath = "/" . join('/', array_reverse($folder));
 
             // Fetch metadata in dropbox
             $metadata = $Client->getMetadata($dropboxpath);
