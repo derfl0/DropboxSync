@@ -1,0 +1,5 @@
+pluginname=DropboxSync
+pluginclassname=DropboxsyncPlugin
+origin=intelec
+version=0.1a
+studipMinVersion=3.1
