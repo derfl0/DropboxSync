@@ -73,17 +73,17 @@ class DropboxSync extends SimpleORMap {
             $Client = $this->getClient();
 
             // Build paths
-            $folder[] = $file->filename;
+            $folder[] = studip_utf8encode(str_replace('/', ':', $file->filename));
             if ($file->folder) {
-                $folder[] = str_replace('/', ':', $file->folder->name);
+                $folder[] = studip_utf8encode(str_replace('/', ':', $file->folder->name));
                 $newfolder = DocumentFolder::find($file->folder->range_id);
             }
             while ($newfolder) {
-                $folder[] = str_replace('/', ':', $newfolder->name);
+                $folder[] = studip_utf8encode(str_replace('/', ':', $newfolder->name));
                 $newfolder = DocumentFolder::find($newfolder->range_id);
             }
-            $folder[] = str_replace('/', ':', $file->course->getFullname());
-            $folder[] = str_replace('/', ':', $file->course->start_semester->name);
+            $folder[] = studip_utf8encode(str_replace('/', ':', $file->course->getFullname()));
+            $folder[] = studip_utf8encode(str_replace('/', ':', $file->course->start_semester->name));
 
             $dropboxpath = "/" . join('/', array_reverse($folder));
             
