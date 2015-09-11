@@ -1,6 +1,6 @@
 <?php
 
-class InstallDB extends DBMigration {
+class Install extends DBMigration {
 
     function up() {
         DBManager::get()->query("CREATE TABLE IF NOT EXISTS dropbox_sync (user_id varchar(32) NOT NULL DEFAULT '',

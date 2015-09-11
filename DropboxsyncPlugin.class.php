@@ -14,10 +14,10 @@ class DropboxsyncPlugin extends StudIPPlugin implements SystemPlugin {
 
     public function __construct() {
         parent::__construct();
-
+        
         $navigation = new AutoNavigation(_('DropboxSync'));
         $navigation->setURL(PluginEngine::GetURL($this, array(), 'show'));
-        Navigation::addItem('/links/settings/dropboxsyncplugin', $navigation);
+        //Navigation::addItem('/links/settings/dropboxsyncplugin', $navigation);
     }
 
     public function perform($unconsumed_path)

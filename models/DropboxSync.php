@@ -51,6 +51,10 @@ class DropboxSync extends SimpleORMap {
             }
         }
     }
+    
+    public function syncNewFiles() {
+        
+    }
 
     /**
      * Synchronizes a file with dropbox
@@ -82,7 +86,7 @@ class DropboxSync extends SimpleORMap {
             $folder[] = str_replace('/', ':', $file->course->start_semester->name);
 
             $dropboxpath = "/" . join('/', array_reverse($folder));
-//var_dump($dropboxpath);die;
+            
             // Fetch metadata in dropbox
             $metadata = $Client->getMetadata($dropboxpath);
 
