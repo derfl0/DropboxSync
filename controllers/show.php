@@ -14,10 +14,21 @@ class ShowController extends StudipController {
 
         // Fetch stored client
         $this->sync = new DropboxSync(User::findCurrent()->id);
+
+        // Navigation hack
+        PageLayout::setTabNavigation('/links/settings');
+        Navigation::activateItem('/links/settings/dropboxsyncplugin');
     }
 
     public function index_action() {
         $this->authorizeUrl = $this->getWebAuth()->start();
+
+        // Sidebar
+        $sidebar = Sidebar::Get();
+        $sidebar->setImage($this->plugin->getPluginURL() . '/assets/sidebar-dropbox.png');
+
+        //$actions = new ActionsWidget();
+        //$sidebar->addWidget($actions);
     }
 
     public function auth_action() {
@@ -30,12 +41,24 @@ class ShowController extends StudipController {
     }
 
     public function sync_action() {
-        $this->sync->sync();
+        
+        // Since this can take quite a while
+        if (time() - $_SESSION['dropbox'] > 86400) {
+            $_SESSION['dropbox'] = time();
+            ini_set('max_execution_time', 86400);
+            $this->sync->sync();
+            unset($_SESSION['dropbox']);
+        }
+        $this->redirect('show/index');
+    }
+
+    public function kill_action() {
+        $this->sync->kill();
         $this->redirect('show/index');
     }
 
     private function getWebAuth() {
-        include dirname(__DIR__).'/key.php';
+        include dirname(__DIR__) . '/key.php';
         $appInfo = new Dropbox\AppInfo($key, $secret);
         return new Dropbox\WebAuth($appInfo, "Studip/1.0", $GLOBALS['ABSOLUTE_URI_STUDIP'] . 'plugins.php/dropboxsyncplugin/show/auth', new Dropbox\ArrayEntryStore($_SESSION, 'dropbox-auth-csrf-token'));
     }
