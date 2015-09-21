@@ -44,6 +44,7 @@ class DropboxCronjob extends CronJob {
                 // Empty paths
                 $dropboxpath = '';
                 $folder = array();
+                $newfolder = false;
                 
                 // Start building new path
                 $file = StudipDocument::build($data);
