@@ -43,12 +43,12 @@ class ShowController extends StudipController {
     public function sync_action() {
         
         // Since this can take quite a while
-        //if (time() - $_SESSION['dropbox'] > 86400) {
+        if (time() - $_SESSION['dropbox'] > 86400) {
             $_SESSION['dropbox'] = time();
             ini_set('max_execution_time', 86400);
             $this->sync->sync();
             unset($_SESSION['dropbox']);
-        //}
+        }
         $this->redirect('show/index');
     }
 
@@ -57,12 +57,6 @@ class ShowController extends StudipController {
         $this->redirect('show/index');
     }
     
-    public function dojob_action($job_id) {
-        $job = DropboxQueue::find($job_id);
-        $job->execute();
-        $this->render_nothing();
-    }
-
     private function getWebAuth() {
         include dirname(__DIR__) . '/key.php';
         $appInfo = new Dropbox\AppInfo($key, $secret);

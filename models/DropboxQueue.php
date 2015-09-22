@@ -1,4 +1,5 @@
 <?php
+
 /**
  * DropboxQueue.php
  * model class for table DropboxQueue
@@ -27,9 +28,16 @@ class DropboxQueue extends SimpleORMap {
 
     public function execute() {
         $Client = new Dropbox\Client($this->sync->secret, "Studip/1.0");
-        $f = fopen($this->filepath, "rb");
+
+        // Fetch metadata in dropbox
+        $metadata = $Client->getMetadata($this->dropboxpath);
+
+        // If file doesnt exists on dropbox or is older on dropbox
+        if (!$metadata || $metadata['modified'] < $this->date) {
+            $f = fopen($this->filepath, "rb");
         $result = $Client->uploadFile($this->dropboxpath, Dropbox\WriteMode::update(), $f);
-        fclose($f);
+            fclose($f);
+        }
         $this->delete();
     }
 

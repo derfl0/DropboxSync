@@ -5,11 +5,19 @@ require_once 'models/DropboxQueue.php';
 require_once 'models/DropboxSync.php';
 require_once 'dropbox/autoload.php';
 
-// Extract params
-parse_str(implode('&', array_slice($argv, 1)), $_GET);
-
-// https://www.youtube.com/watch?v=ZXsQAXx_ao0
-if ($_GET['id']) {
-    $job = DropboxQueue::find($_GET['id']);
-    $job->execute();
+// Prepare
+$process_id = uniqid('thread');
+while ($timeout < 30) {
+    
+    // Try to reserve a job
+    DBManager::get()->execute('UPDATE dropbox_queue SET process_id = ? WHERE process_id IS NULL LIMIT 1', array($process_id));
+    
+    $jobs = DropboxQueue::findByProcess_id($process_id);
+    if ($jobs) {
+        $job = $jobs[0];
+        $job->execute();
+    } else {
+        $timeout++;
+        sleep(1);
+    }
 }
