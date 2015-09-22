@@ -18,7 +18,6 @@
 class DropboxSync extends SimpleORMap {
 
     private $client;
-    private $threadcounter;
 
     protected static function configure($config = array()) {
         $config['db_table'] = 'dropbox_sync';
@@ -51,6 +50,8 @@ class DropboxSync extends SimpleORMap {
                 $this->syncFile($file);
             }
         }
+
+        DropboxThreadstarter::start();
     }
 
     public function syncNewFiles() {
@@ -85,18 +86,12 @@ class DropboxSync extends SimpleORMap {
 
             $dropboxpath = "/" . join('/', array_reverse($folder));
 
-            $job = DropboxQueue::create(array(
+            DropboxQueue::create(array(
                         'user_id' => User::findCurrent()->id,
                         'filepath' => $filepath,
                         'dropboxpath' => $dropboxpath,
                         'date' => $file->chdate
             ));
-
-            // Thread it
-            if ($this->threadcounter < 10) {
-                exec(PHP_BINDIR . '/php ' . dirname(__DIR__) . '/Thread.php > /dev/null 2>/dev/null &');
-                $this->threadcounter = $this->threadcounter + 1;
-            }
         }
     }
 

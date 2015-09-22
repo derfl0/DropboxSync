@@ -13,7 +13,7 @@ $process_id = uniqid('thread');
 while ($timeout < 30) {
     
     // Try to reserve a job
-    DBManager::get()->execute('UPDATE dropbox_queue SET process_id = ? WHERE process_id IS NULL LIMIT 1', array($process_id));
+    DBManager::get()->execute('UPDATE dropbox_queue SET process_id = ?, startdate = ? WHERE process_id IS NULL AND (startdate IS NULL OR startdate + 600 < ?) LIMIT 1', array($process_id, time(), time()));
     
     $jobs = DropboxQueue::findByProcess_id($process_id);
     if ($jobs) {

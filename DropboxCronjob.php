@@ -4,8 +4,6 @@ require_once 'dropbox/autoload.php';
 
 class DropboxCronjob extends CronJob {
 
-    private $clients = array();
-
     public static function getName() {
         return _('Dropbox');
     }
@@ -36,16 +34,19 @@ class DropboxCronjob extends CronJob {
 
         // Find all Files that have changed
         $db = DBManager::get();
-        $result = $db->query('SELECT dokumente.*,dropbox_sync.user_id as dropbox_user_id,dropbox_sync.secret FROM dokumente JOIN seminar_user USING (seminar_id) JOIN dropbox_sync ON (seminar_user.user_id = dropbox_sync.user_id) GROUP BY dokument_id');
-        while ($data = $result->fetch(PDO::FETCH_ASSOC)) {
+        $time = time();
+        $stmt = $db->prepare('SELECT dokumente.*,dropbox_sync.user_id as dropbox_user_id,dropbox_sync.secret FROM dokumente JOIN seminar_user USING (seminar_id) JOIN dropbox_sync ON (seminar_user.user_id = dropbox_sync.user_id) WHERE chdate > ? GROUP BY dokument_id');
+        $stmt->execute(array(Config::get()->DROPBOX_LAST_SYNC));
+        Config::get()->store('DROPBOX_LAST_SYNC', $time);
+        while ($data = $stmt->fetch(PDO::FETCH_ASSOC)) {
             // Produce files and paths
             if (!$file || $file->id != $data['dokument_id']) {
-                
+
                 // Empty paths
                 $dropboxpath = '';
                 $folder = array();
                 $newfolder = false;
-                
+
                 // Start building new path
                 $file = StudipDocument::build($data);
                 $filepath = $GLOBALS['UPLOAD_PATH'] . '/' . substr($file->dokument_id, 0, 2) . '/' . $file->dokument_id;
@@ -72,25 +73,16 @@ class DropboxCronjob extends CronJob {
 
             // Upload
             if ($dropboxpath) {
-                $Client = $this->getClient($data['dropbox_user_id'], $data['secret']);
-                // Fetch metadata in dropbox
-                $metadata = $Client->getMetadata($dropboxpath);
-
-                // If file doesnt exists on dropbox or is older on dropbox
-                if (!$metadata || $metadata['modified'] < $file->chdate) {
-                    $f = fopen($filepath, "rb");
-                    $Client->uploadFile($dropboxpath, Dropbox\WriteMode::update(), $f);
-                    fclose($f);
-                }
+                DropboxQueue::create(array(
+                    'user_id' => $data['dropbox_user_id'],
+                    'filepath' => $filepath,
+                    'dropboxpath' => $dropboxpath,
+                    'date' => $file->chdate
+                ));
             }
         }
-    }
 
-    private function getClient($user_id, $secret) {
-        if (!$this->clients[$user_id]) {
-            $this->clients[$user_id] = new Dropbox\Client($secret, "Studip/1.0");
-        }
-        return $this->clients[$user_id];
+        DropboxThreadstarter::start();
     }
 
     function tearDown() {
