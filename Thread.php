@@ -5,6 +5,9 @@ require_once 'models/DropboxQueue.php';
 require_once 'models/DropboxSync.php';
 require_once 'dropbox/autoload.php';
 
+// We need to run quite a long time
+ini_set('max_execution_time', 86400);
+
 // Prepare
 $process_id = uniqid('thread');
 while ($timeout < 30) {

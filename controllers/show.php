@@ -45,7 +45,6 @@ class ShowController extends StudipController {
         // Since this can take quite a while
         if (time() - $_SESSION['dropbox'] > 86400) {
             $_SESSION['dropbox'] = time();
-            ini_set('max_execution_time', 86400);
             $this->sync->sync();
             unset($_SESSION['dropbox']);
         }
