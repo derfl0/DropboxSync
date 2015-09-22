@@ -35,7 +35,7 @@ class DropboxQueue extends SimpleORMap {
         // If file doesnt exists on dropbox or is older on dropbox
         if (!$metadata || $metadata['modified'] < $this->date) {
             $f = fopen($this->filepath, "rb");
-            $result = $Client->uploadFile($this->dropboxpath, Dropbox\WriteMode::update(), $f);
+            $result = $Client->uploadFile($this->dropboxpath, Dropbox\WriteMode::force(), $f);
             fclose($f);
         }
         $this->delete();

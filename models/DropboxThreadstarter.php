@@ -17,10 +17,11 @@
  */
 class DropboxThreadstarter {
 
-    const MAX_THREADS = 30;
+    const MAX_THREADS = 20;
+    const THREAD_TIMEOUT = 60;
 
     public function start() {
-        $result = DBManager::get()->query("SELECT COUNT(*) FROM dropbox_queue WHERE process_id IS NOT NULL");
+        $result = DBManager::get()->query("SELECT COUNT(*) FROM dropbox_queue WHERE process_id IS NOT NULL AND startdate + ".self::THREAD_TIMEOUT." > UNIX_TIMESTAMP()");
         $count = $result->fetchColumn();
         for ($i = 0; $i < self::MAX_THREADS - $count; $i++) {
             exec(PHP_BINDIR . '/php ' . dirname(__DIR__) . '/Thread.php > /dev/null 2>/dev/null &');
