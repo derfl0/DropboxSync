@@ -42,7 +42,7 @@ class DropboxsyncPlugin extends StudIPPlugin implements SystemPlugin {
         
         // Delete Cronjob
         $task = CronjobTask::findByClass("DropboxCronjob");
-        CronjobScheduler::getInstance()->unregisterTask($task[0]->id);
+        CronjobScheduler::getInstance()->cancelByTask($task[0]->id);
         $task->delete();
 
         parent::onDisable($pluginId);
