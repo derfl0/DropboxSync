@@ -1,5 +1,5 @@
-<? if ($sync->getClient()): ?>
-    Verbunden mit: <?= $sync->getClient()->getAccountInfo()['display_name'] ?><br>
+<? if ($displayname): ?>
+    Verbunden mit: <?= htmlReady($displayname) ?><br>
     <a href="<?= $controller->url_for('show/sync') ?>">Dropbox synchronisieren</a><br>
     <a href="<?= $controller->url_for('show/kill') ?>">Dropbox Verknüpfung aufheben</a>
 <? else: ?>
