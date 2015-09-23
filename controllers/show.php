@@ -41,7 +41,7 @@ class ShowController extends StudipController {
     }
 
     public function sync_action() {
-        
+
         // Since this can take quite a while
         if (time() - $_SESSION['dropbox'] > 86400) {
             $_SESSION['dropbox'] = time();
@@ -55,9 +55,14 @@ class ShowController extends StudipController {
         $this->sync->kill();
         $this->redirect('show/index');
     }
-    
+
     private function getWebAuth() {
-        include dirname(__DIR__) . '/key.php';
+        if (file_exists(dirname(__DIR__) . '/key.php')) {
+            include dirname(__DIR__) . '/key.php';
+        } else {
+            $key = Config::get()->DROPBOX_APP_KEY;
+            $secret = Config::get()->DROPBOX_APP_SECRET;
+        }
         $appInfo = new Dropbox\AppInfo($key, $secret);
         return new Dropbox\WebAuth($appInfo, "Studip/1.0", $GLOBALS['ABSOLUTE_URI_STUDIP'] . 'plugins.php/dropboxsyncplugin/show/auth', new Dropbox\ArrayEntryStore($_SESSION, 'dropbox-auth-csrf-token'));
     }
