@@ -33,9 +33,14 @@ class DropboxCronjob extends CronJob {
         }
 
         // Find all Files that have changed
-        $db = DBManager::get();
         $time = time();
-        $stmt = $db->prepare('SELECT dokumente.*,dropbox_sync.user_id as dropbox_user_id,dropbox_sync.secret FROM dokumente JOIN seminar_user USING (seminar_id) JOIN dropbox_sync ON (seminar_user.user_id = dropbox_sync.user_id) WHERE chdate > ? GROUP BY dokument_id');
+        $query = "SELECT dokumente.*, dropbox_sync.user_id as dropbox_user_id, dropbox_sync.secret
+                  FROM dokumente
+                  JOIN seminar_user USING (seminar_id)
+                  JOIN dropbox_sync ON (seminar_user.user_id = dropbox_sync.user_id)
+                  WHERE chdate > ?
+                  GROUP BY user_id, dokument_id";
+        $stmt = DBManager::get()->prepare($query);
         $stmt->execute(array(Config::get()->DROPBOX_LAST_SYNC));
         Config::get()->store('DROPBOX_LAST_SYNC', $time);
         while ($data = $stmt->fetch(PDO::FETCH_ASSOC)) {
