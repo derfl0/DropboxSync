@@ -26,11 +26,15 @@ class ShowController extends StudipController {
         // Sidebar
         $sidebar = Sidebar::Get();
         $sidebar->setImage($this->plugin->getPluginURL() . '/assets/sidebar-dropbox.png');
-        
+
         $client = $this->sync->getClient();
         if ($client) {
-            $account = $client->getAccountInfo();
-            $this->displayname = $account['display_name'];
+            try {
+                $account = $client->getAccountInfo();
+                $this->displayname = $account['display_name'];
+            } catch (Exception $ex) {
+                
+            }
         }
 
         //$actions = new ActionsWidget();
